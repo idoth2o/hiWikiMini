@@ -1,0 +1,114 @@
+<html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<head>
+<script> 
+<!-- $Id$ -->
+var WikiSpaceName="hiWikiMini";
+
+var ls = window.localStorage;
+function init(){
+	if(ls["トップページ"] == undefined){
+	ls["トップページ"]="Welcome " + WikiSpaceName + "\n\n" +
+		"NAME\n  hiWiki Mini(based on Html5 I Wiki Mini)\n\n" +
+		"VERSION\n  0.1 Initial Release(Alpha Version)\n\n" +
+		"DESCRIPTION\n  hiWikiMini is a yet another subset of Wiki clone.\n\n" + 
+		"COPYRIGHT\n  Copyright 2010 id:dot_h2o2\n  This program is GPL software\n\n" +
+		"SEE ALSO\n  YukiWikiMini:http://www.hyuki.com/yukiwiki/mini/index.html";
+	}
+	if(ls["新規"] ==undefined){
+		ls["新規"]="";
+	}
+	read('トップページ');
+}
+
+function setPageName(element,name){
+        if(name){
+                if (typeof element.textContent != "undefined")                {
+                        element.textContent = name;                }       
+                else
+                {
+                        element.innerText = name;
+                }
+        }
+        return;
+}
+ 
+function read(pagename){
+	setPageName(document.getElementById('pagetitle'),pagename); 
+    var content = ls[pagename];
+ 
+    content = content.replace(/<([^>]+)>/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+    document.getElementById('content').innerHTML = '<pre>' + content + '</pre>';
+    
+    var el = document.getElementById('editmode');
+    el.href="javascript:edit('" + pagename +"')";
+}
+ 
+ 
+function edit(pagename){
+ 
+	setPageName(document.getElementById('pagetitle'),pagename); 
+    var content = ls[pagename];
+ 
+        var html =
+           "<form  onsubmit='save(\"" + pagename + "\"); return false;'>"
+           + "<input type='text' id='pagename' value=" + pagename + "><br>"
+         + "<textarea cols='80' rows='10' id='textarea' wrap='off'>" + content + "</textarea><br />"
+         + "<input type='submit' value='保存'><br />"
+         + "</form>";
+ 
+    document.getElementById('content').innerHTML = html;
+ 
+}
+ 
+function list(){
+	setPageName(document.getElementById('pagetitle'),"ページ一覧");
+	var html ="\n";
+	for (var i = 0; i < ls.length; i++) {
+	  var key = ls.key(i);
+	  html = html + "<LI><a href=javascript:read(\'" + key +  "\')>" + key + '</a>'; 
+	}
+
+	document.getElementById('content').innerHTML = html;
+	
+	var el = document.getElementById('editmode');
+    el.href="javascript:void(0);";
+    el.onclick="return false;";
+}
+ 
+ 
+function save(pagename){
+
+    var content = document.getElementById('textarea').value.replace(/\</g,"&lt;");
+    content.replace(/\>/g,"&rt;");
+    var pagename = document.getElementById('pagename').value;
+    
+	ls[pagename]=content;
+ 
+    var conten = content.replace(/<([^>]+)>/g, "<a href='javascript:read(\"$1\")'>$1</a>"); 
+    content = content.replace(/\[([^>]+)\]/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+    content = content.replace(/\-([^\-]+)\n/,"<li>$1</li>");
+    
+    document.getElementById('content').innerHTML = '<pre>' + content + '</pre>';
+    
+ 
+}
+</script> 
+</head> 
+<body onload="init()"> 
+    <table width="100%" border="0"> 
+        <tr valign="top"> 
+            <td> 
+                <h1 id="pagetitle">トップページ</h1> 
+            </td> 
+            <td align="right"> 
+                <a id="topmode" href="javascript:read('トップページ')">トップページ</a> | 
+                <a id="newmode" href="javascript:edit('新規ページ')" >新規</a> |  
+                <a id="editmode" href="javascript:edit('トップページ')" >編集</a> |
+                <a id="listmode" href="javascript:list()">ページ一覧</a> 
+            </td> 
+        </tr> 
+    </table> 
+    <div id="content"></div> 
+</body> 
+</html> 
