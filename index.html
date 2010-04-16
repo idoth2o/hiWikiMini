@@ -2,23 +2,27 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <head>
 <script> 
-<!-- $Id$ -->
 var WikiSpaceName="hiWikiMini";
-
 var ls = window.localStorage;
 function init(){
 	if(ls["トップページ"] == undefined){
 	ls["トップページ"]="Welcome " + WikiSpaceName + "\n\n" +
 		"NAME\n  hiWiki Mini(based on Html5 I Wiki Mini)\n\n" +
-		"VERSION\n  0.1 Initial Release(Alpha Version)\n\n" +
+		"VERSION\n  0.1 Initial Release(Alpha Version)\n" +
+		"  0.2 Add Page delete function & Help Page\n\n" +
 		"DESCRIPTION\n  hiWikiMini is a yet another subset of Wiki clone.\n\n" + 
+		"SOURCE\n  http://github.com/idoth2o/hiWikiMini\n" +
+		"  [[Developer Blog|http://d.hatena.ne.jp/dot_h2o2/]]\n\n" +
 		"COPYRIGHT\n  Copyright 2010 id:dot_h2o2\n  This program is GPL software\n\n" +
 		"SEE ALSO\n  YukiWikiMini:http://www.hyuki.com/yukiwiki/mini/index.html";
 	}
-	if(ls["新規"] ==undefined){
-		ls["新規"]="";
+	if(ls["ヘルプ"] == undefined){
+		ls["ヘルプ"] ="文法\n\n" +
+		"-外部リンク\n  [[Developer Blog|http://d.hatena.ne.jp/dot_h2o2/]]\n" +
+		"-WikiNameリンク\n  [トップページ]" +
+		"-リスト化\n";
 	}
-	read('トップページ');
+	read("トップページ");
 }
 
 function setPageName(element,name){
@@ -38,23 +42,36 @@ function read(pagename){
     var content = ls[pagename];
  
     content = content.replace(/<([^>]+)>/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+    //OverLink
+    content = content.replace(/\[\[([^>]+?)\|([^>]+?)\]\]/g, "<a href='$2'>$1</a>"); 
+    //WikiName Link
+    content = content.replace(/\[([^>]+?)\]/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+    //List Tag
+    content = content.replace(/\-([^\-]+?)(\n|\r)/g,"<li>$1</li>");
+
     document.getElementById('content').innerHTML = '<pre>' + content + '</pre>';
     
     var el = document.getElementById('editmode');
     el.href="javascript:edit('" + pagename +"')";
 }
- 
+function del(pagename){
+	if(ls[pagename] != undefined){
+		ls.removeItem(pagename);
+	}
+	read("トップページ");
+} 
  
 function edit(pagename){
  
 	setPageName(document.getElementById('pagetitle'),pagename); 
     var content = ls[pagename];
- 
-        var html =
-           "<form  onsubmit='save(\"" + pagename + "\"); return false;'>"
-           + "<input type='text' id='pagename' value=" + pagename + "><br>"
+	// var html = "<form onsubmit='save(\"" + pagename + "\"); return false;'>"
+    var html =
+         "<form>"
+         + "<input type='text' id='pagename' value=" + pagename + "><br>"
          + "<textarea cols='80' rows='10' id='textarea' wrap='off'>" + content + "</textarea><br />"
-         + "<input type='submit' value='保存'><br />"
+         + "<input type='submit' value='保存' onclick='save(\"" + pagename + "\"); return false;'> &nbsp;&nbsp;&nbsp;"
+		 + "<input type='submit' value='削除' onclick='del(\"" + pagename + "\"); return false;'><br /><br />" 
          + "</form>";
  
     document.getElementById('content').innerHTML = html;
@@ -85,9 +102,13 @@ function save(pagename){
     
 	ls[pagename]=content;
  
-    var conten = content.replace(/<([^>]+)>/g, "<a href='javascript:read(\"$1\")'>$1</a>"); 
-    content = content.replace(/\[([^>]+)\]/g, "<a href='javascript:read(\"$1\")'>$1</a>");
-    content = content.replace(/\-([^\-]+)\n/,"<li>$1</li>");
+    var conten = content.replace(/<([^>]+)>/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+    //OverLink
+    content = content.replace(/\[\[([^>]+?)\|([^>]+?)\]\]/g, "<a href='$2'>$1</a>"); 
+    //WikiName Link
+    content = content.replace(/\[([^>]+?)\]/g, "<a href='javascript:read(\"$1\")'>$1</a>");
+	//List Tag
+    content = content.replace(/\-([^\-]+?)(\n|\r)/g,"<li>$1</li>");
     
     document.getElementById('content').innerHTML = '<pre>' + content + '</pre>';
     
